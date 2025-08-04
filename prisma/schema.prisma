@@ -1,0 +1,31 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model TokenResult {
+    id           Int        @id @default(autoincrement())
+    tokenQueryId Int        @unique
+    name         String
+    chain        String
+    price        Float
+    marketCap    Float
+    fdv          Float
+    volume24h    Float
+    liquidity    Float
+    aiInsight    String
+    safetyScore  Int
+    tokenQuery   TokenQuery @relation(fields: [tokenQueryId], references: [id])
+}
+
+model TokenQuery {
+    id        Int          @id @default(autoincrement())
+    query     String
+    result    TokenResult?
+    createdAt DateTime     @default(now())
+}

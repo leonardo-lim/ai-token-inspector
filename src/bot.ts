@@ -52,8 +52,12 @@ bot.on('message:text', async (ctx) => {
             ctx.reply(tokenInfo + response.text, {
                 parse_mode: 'Markdown'
             });
-        } catch (error) {
-            ctx.reply('Failed to get token info');
+        } catch (error: any) {
+            if (error.message === 'NO_TOKEN') {
+                ctx.reply('No token found');
+            } else {
+                ctx.reply('Failed to get token info');
+            }
         }
     } else if (command === '/price') {
         const tokenName = args[1];

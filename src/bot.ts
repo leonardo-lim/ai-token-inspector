@@ -1,6 +1,7 @@
 import { Bot } from 'grammy';
 import dotenv from 'dotenv';
 import { getTokenInfo } from './utils/token-info';
+import { getTokenPrice } from './utils/token-price';
 
 dotenv.config();
 
@@ -35,6 +36,28 @@ bot.on('message:text', async (ctx) => {
             );
         } catch (error) {
             ctx.reply('Failed to get token info');
+        }
+    } else if (command === '/price') {
+        const tokenName = args[1];
+        const chainName = args[2] || null;
+
+        ctx.reply('Getting token price...');
+
+        try {
+            const price = await getTokenPrice(tokenName, chainName);
+
+            ctx.reply(
+                `*${price.name}*\n` +
+                `🔗 Chain: ${price.chain.charAt(0).toUpperCase() + price.chain.slice(1)}\n` +
+                `💵 Price: $${price.price.toLocaleString('en-US')}\n` +
+                `🔁 Volume 24h: $${price.volume24h.toLocaleString('en-US')}\n` +
+                `💧 Liquidity: $${price.liquidity.toLocaleString('en-US')}`,
+                {
+                    parse_mode: 'Markdown'
+                }
+            );
+        } catch (error) {
+            ctx.reply('Failed to get token price');
         }
     }
 });

@@ -8,6 +8,11 @@ const getSearchPairs = async (tokenName: string) => {
 
 const getTokenPrice = async (tokenName: string, chainName: string | null) => {
     const searchPairs: DexPair[] = await getSearchPairs(tokenName);
+
+    if (searchPairs.length === 0) {
+        throw new Error('NO_RESULT');
+    }
+
     let pair: DexPair | undefined = undefined;
 
     if (chainName) {
@@ -21,7 +26,11 @@ const getTokenPrice = async (tokenName: string, chainName: string | null) => {
         ));
     }
 
-    const { chainId, pairAddress } = pair!;
+    if (!pair) {
+        throw new Error('NO_RESULT');
+    }
+
+    const { chainId, pairAddress } = pair;
 
     const response = await axios.get(`https://api.dexscreener.com/latest/dex/pairs/${chainId}/${pairAddress}`);
     const data = response.data.pairs[0];

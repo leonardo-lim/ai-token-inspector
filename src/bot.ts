@@ -78,8 +78,12 @@ bot.on('message:text', async (ctx) => {
                     parse_mode: 'Markdown'
                 }
             );
-        } catch (error) {
-            ctx.reply('Failed to get token price');
+        } catch (error: any) {
+            if (error.message === 'NO_RESULT') {
+                ctx.reply('No token found');
+            } else {
+                ctx.reply('Failed to get token price');
+            }
         }
     }
 });

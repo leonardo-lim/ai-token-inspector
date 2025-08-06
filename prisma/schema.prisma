@@ -14,12 +14,11 @@ model TokenResult {
     name         String
     chain        String
     price        Float
-    marketCap    Float
-    fdv          Float
+    marketCap    Float?
+    fdv          Float?
     volume24h    Float
     liquidity    Float
-    aiInsight    String
-    safetyScore  Int
+    aiInsight    String?
     tokenQuery   TokenQuery @relation(fields: [tokenQueryId], references: [id])
 }
 

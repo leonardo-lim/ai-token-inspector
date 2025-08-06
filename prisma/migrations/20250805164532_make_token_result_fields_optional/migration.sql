@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "public"."TokenResult" ALTER COLUMN "marketCap" DROP NOT NULL,
+ALTER COLUMN "fdv" DROP NOT NULL,
+ALTER COLUMN "aiInsight" DROP NOT NULL;

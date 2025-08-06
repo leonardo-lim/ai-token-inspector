@@ -151,6 +151,8 @@ bot.on('message:text', async (ctx) => {
                 parse_mode: 'Markdown'
             }
         );
+    } else {
+        ctx.reply('Unknown command');
     }
 });
 

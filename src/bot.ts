@@ -129,6 +129,28 @@ bot.on('message:text', async (ctx) => {
                 }
             }
         }
+    } else if (command === '/help') {
+        ctx.reply(
+            "🛠 *Commands*\n" +
+            "\n" +
+            "🔹 `/token <contract_address>`\n" +
+            "Get token info by providing the contract address.\n" +
+            "Example:\n" +
+            "`/token 0x1234567890abcdef...\n`" +
+            "\n" +
+            "🔹 `/price <token_name>`\n" +
+            "Get the price of a token across supported chains.\n" +
+            "Example:\n" +
+            "`/price PEPE\n`" +
+            "\n" +
+            "🔹 `/price <token_name> <chain_name>`\n" +
+            "Get the price of a token on a specific chain.\n" +
+            "Example:\n" +
+            "`/price PEPE ethereum`",
+            {
+                parse_mode: 'Markdown'
+            }
+        );
     }
 });
 

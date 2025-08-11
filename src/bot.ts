@@ -4,7 +4,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import dotenv from 'dotenv';
 import { getTokenInfo } from './utils/token-info';
 import { getTokenPrice } from './utils/token-price';
-import { getTokenResultByQuery, saveTokenInfoQuery, saveTokenPriceQuery } from './services/token-service';
+import { TokenQueryService } from './services/token-query-service';
 
 dotenv.config();
 
@@ -14,6 +14,8 @@ const chatModel = new ChatGoogleGenerativeAI({
     apiKey: process.env.GOOGLE_API_KEY,
     model: 'gemini-2.5-flash'
 });
+
+const tokenQueryService = new TokenQueryService();
 
 bot.command('start', (ctx) => ctx.reply('Welcome to AI Token Inspector!'));
 
@@ -25,7 +27,7 @@ bot.on('message:text', async (ctx) => {
     if (command === '/token') {
         ctx.reply('Getting token info...');
 
-        const tokenResult = await getTokenResultByQuery(input);
+        const tokenResult = await tokenQueryService.getTokenResultByQuery(input);
 
         if (tokenResult) {
             const info = tokenResult.result!;
@@ -69,7 +71,7 @@ bot.on('message:text', async (ctx) => {
                     )
                 ]);
 
-                await saveTokenInfoQuery(input, info, response.text);
+                await tokenQueryService.saveTokenInfoQuery(input, info, response.text);
 
                 ctx.reply(tokenInfo + response.text, {
                     parse_mode: 'Markdown'
@@ -86,7 +88,7 @@ bot.on('message:text', async (ctx) => {
     } else if (command === '/price') {
         ctx.reply('Getting token price...');
 
-        const tokenResult = await getTokenResultByQuery(input);
+        const tokenResult = await tokenQueryService.getTokenResultByQuery(input);
 
         if (tokenResult) {
             const info = tokenResult.result!;
@@ -109,7 +111,7 @@ bot.on('message:text', async (ctx) => {
             try {
                 const price = await getTokenPrice(tokenName, chainName);
 
-                await saveTokenPriceQuery(input, price);
+                await tokenQueryService.saveTokenPriceQuery(input, price);
 
                 ctx.reply(
                     `*${price.name}*\n` +

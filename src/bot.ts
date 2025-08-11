@@ -2,9 +2,8 @@ import { Bot } from 'grammy';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage } from '@langchain/core/messages';
 import dotenv from 'dotenv';
-import { getTokenInfo } from './utils/token-info';
-import { getTokenPrice } from './utils/token-price';
 import { TokenQueryService } from './services/token-query-service';
+import { TokenAPIService } from './services/token-api-service';
 
 dotenv.config();
 
@@ -16,6 +15,7 @@ const chatModel = new ChatGoogleGenerativeAI({
 });
 
 const tokenQueryService = new TokenQueryService();
+const tokenAPIService = new TokenAPIService();
 
 bot.command('start', (ctx) => ctx.reply('Welcome to AI Token Inspector!'));
 
@@ -49,7 +49,7 @@ bot.on('message:text', async (ctx) => {
             const address = args[1];
 
             try {
-                const info = await getTokenInfo(address);
+                const info = await tokenAPIService.getTokenInfo(address);
 
                 const tokenInfo = (
                     `*${info.name}*\n` +
@@ -109,7 +109,7 @@ bot.on('message:text', async (ctx) => {
             const chainName = args[2] || null;
 
             try {
-                const price = await getTokenPrice(tokenName, chainName);
+                const price = await tokenAPIService.getTokenPrice(tokenName, chainName);
 
                 await tokenQueryService.saveTokenPriceQuery(input, price);
 

@@ -1,21 +1,16 @@
 import { Bot } from 'grammy';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { HumanMessage } from '@langchain/core/messages';
 import dotenv from 'dotenv';
 import { TokenQueryService } from './services/token-query-service';
 import { TokenAPIService } from './services/token-api-service';
+import { AIService } from './services/ai-service';
 
 dotenv.config();
 
 const bot = new Bot(process.env.BOT_TOKEN!);
 
-const chatModel = new ChatGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_API_KEY,
-    model: 'gemini-2.5-flash'
-});
-
 const tokenQueryService = new TokenQueryService();
 const tokenAPIService = new TokenAPIService();
+const aiService = new AIService();
 
 bot.command('start', (ctx) => ctx.reply('Welcome to AI Token Inspector!'));
 
@@ -61,19 +56,10 @@ bot.on('message:text', async (ctx) => {
                     `💧 Liquidity: $${info.liquidity.toLocaleString('en-US')}\n`
                 );
 
-                const response = await chatModel.invoke([
-                    new HumanMessage(
-                        'Analyze this token:\n' +
-                        tokenInfo +
-                        'Based on the data, provide a clear and solid one-sentence insight into the token\'s potential and risks. Also, estimate a safety score between 0 and 100% based on on-chain activity and liquidity metrics. Output only the percentage value (e.g., "42%") and a one-sentence explanation. Format the response exactly like this:' +
-                        `🧠 AI Insight: {insight}\n` +
-                        `🛡️ Safety Score: {percentage} ({reason})`,
-                    )
-                ]);
+                const insight = await aiService.generateInsight(tokenInfo);
+                await tokenQueryService.saveTokenInfoQuery(input, info, insight);
 
-                await tokenQueryService.saveTokenInfoQuery(input, info, response.text);
-
-                ctx.reply(tokenInfo + response.text, {
+                ctx.reply(tokenInfo + insight, {
                     parse_mode: 'Markdown'
                 });
             } catch (error: any) {

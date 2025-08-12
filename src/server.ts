@@ -1,10 +1,10 @@
 import Fastify from 'fastify';
 import { Bot } from 'grammy';
 import dotenv from 'dotenv';
-import { TokenQueryService } from './services/token-query-service';
-import { TokenAPIService } from './services/token-api-service';
-import { AIService } from './services/ai-service';
-import { BotService } from './services/bot-service';
+import tokenQueryPlugin from './plugins/token-query-plugin';
+import tokenAPIServicePlugin from './plugins/token-api-plugin';
+import aiPlugin from './plugins/ai-plugin';
+import botPlugin from './plugins/bot-plugin';
 import { createMessageHandler } from './handlers/message-handler';
 
 dotenv.config();
@@ -12,18 +12,20 @@ dotenv.config();
 const server = Fastify({ logger: true });
 const bot = new Bot(process.env.BOT_TOKEN!);
 
-const tokenQueryService = new TokenQueryService();
-const tokenAPIService = new TokenAPIService();
-const aiService = new AIService();
-const botService = new BotService(tokenQueryService, tokenAPIService, aiService);
-
-const messageHandler = createMessageHandler(botService);
+const registerPlugins = async () => {
+    await server.register(tokenQueryPlugin);
+    await server.register(tokenAPIServicePlugin);
+    await server.register(aiPlugin);
+    await server.register(botPlugin);
+};
 
 const start = async () => {
     try {
+        await registerPlugins();
         await server.listen({ port: 3000 });
+
         bot.command('start', (ctx) => ctx.reply('Welcome to AI Token Inspector!'));
-        bot.on('message:text', messageHandler);
+        bot.on('message:text', createMessageHandler(server.botService));
         bot.start();
     } catch (error) {
         server.log.error(error);

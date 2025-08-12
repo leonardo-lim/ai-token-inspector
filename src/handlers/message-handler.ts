@@ -1,7 +1,8 @@
 import type { Context } from 'grammy';
+import { AIService } from '../services/ai-service';
 import { BotService } from '../services/bot-service';
 
-const createMessageHandler = (botService: BotService) => {
+const createMessageHandler = (aiService: AIService, botService: BotService) => {
     return async (ctx: Context) => {
         if (!ctx.message?.text) {
             return;
@@ -38,7 +39,16 @@ const createMessageHandler = (botService: BotService) => {
                     { parse_mode: 'Markdown' }
                 );
             } else {
-                ctx.reply('Unknown command');
+                ctx.reply('Getting response...');
+
+                const response = await aiService.agent.invoke({
+                    messages: [{
+                        role: 'user',
+                        content: input
+                    }]
+                });
+
+                ctx.reply(response.messages[2].content, { parse_mode: 'Markdown' });
             }
         } catch (error: any) {
             ctx.reply(error.message);

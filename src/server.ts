@@ -19,13 +19,18 @@ const registerPlugins = async () => {
     await server.register(botPlugin);
 };
 
+const createAgent = async () => {
+    await server.aiService.createAIAgent(server.botService);
+};
+
 const start = async () => {
     try {
         await registerPlugins();
+        await createAgent();
         await server.listen({ port: 3000 });
 
         bot.command('start', (ctx) => ctx.reply('Welcome to AI Token Inspector!'));
-        bot.on('message:text', createMessageHandler(server.botService));
+        bot.on('message:text', createMessageHandler(server.aiService, server.botService));
         bot.start();
     } catch (error) {
         server.log.error(error);

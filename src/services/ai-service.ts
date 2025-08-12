@@ -1,8 +1,13 @@
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { tool } from '@langchain/core/tools';
 import { HumanMessage } from '@langchain/core/messages';
+import { BotService } from './bot-service';
+import { getTokenInfoSchema, getTokenPriceSchema } from '../schemas/token-schema';
 
 class AIService {
     private chatModel;
+    public agent: any;
 
     constructor() {
         this.chatModel = new ChatGoogleGenerativeAI({
@@ -10,6 +15,39 @@ class AIService {
             model: 'gemini-2.5-flash'
         });
     }
+
+    createAIAgent = async (botService: BotService) => {
+        this.agent = createReactAgent({
+            llm: this.chatModel,
+            tools: [
+                tool(
+                    async (input: unknown) => {
+                        const { address } = getTokenInfoSchema.parse(input);
+                        return botService.handleTokenCommand(`/token ${address}`);
+                    },
+                    {
+                        name: 'get-token-info',
+                        description: 'Get token info by providing the contract address.',
+                        schema: getTokenInfoSchema,
+                    }
+                ),
+                tool(
+                    async (input: unknown) => {
+                        const { tokenName, chainName } = getTokenPriceSchema.parse(input);
+
+                        return botService.handlePriceCommand(
+                            `/price ${tokenName.toLowerCase()}${chainName ? ' ' + chainName.toLowerCase() : ''}`
+                        );
+                    },
+                    {
+                        name: 'get-token-price',
+                        description: 'Get token price by providing the token name and optional chain name.',
+                        schema: getTokenPriceSchema,
+                    }
+                )
+            ]
+        });
+    };
 
     generateInsight = async (tokenInfo: string) => {
         const response = await this.chatModel.invoke([

@@ -82,6 +82,16 @@ Example:
 * `/help`
 Get a list of available commands.
 
+### 4. Direct Message Query
+Send a plain message without a slash command and get the same results as above commands.
+
+Examples:
+```
+• Can you provide the token info for this contract address: 0x1234567890abcdef...
+• What's the current price of PEPE?
+• What's the current price of PEPE on Ethereum?
+```
+
 ## Prompt Structure
 ```
 Analyze this token:
